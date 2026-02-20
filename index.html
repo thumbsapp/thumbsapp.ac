@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThumbsApp · gaming + social + news</title>
+    <!-- Font Awesome 6 (free) for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0f0f0f;
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+
+        /* ===== DARK THEME & NEON ACCENTS ===== */
+        :root {
+            --bg-dark: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --card-bg-light: #222;
+            --neon-purple: #b300ff;
+            --neon-red: #ff3b3b;
+            --neon-blue: #3b8aff;
+            --border-glow: rgba(179, 0, 255, 0.3);
+            --text-muted: #aaa;
+        }
+
+        /* sticky header */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0f0f0fdd;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #2a2a2a;
+            padding: 0.7rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 1.5rem; }
+        .logo { font-size: 1.8rem; font-weight: 800; background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
+        .home-link { color: #ddd; text-decoration: none; font-weight: 500; }
+        .home-link:hover { color: var(--neon-purple); }
+
+        .search-wrapper { flex: 1; max-width: 500px; margin: 0 1.5rem; display: flex; gap: 0.3rem; }
+        .search-bar { flex: 1; background: #2a2a2a; border: none; border-radius: 40px; padding: 0.6rem 1.2rem; color: white; outline: 1px solid transparent; transition: 0.2s; }
+        .search-bar:focus { outline-color: var(--neon-purple); background: #222; }
+        .category-dropdown { background: #2a2a2a; border-radius: 40px; padding: 0.3rem 0.8rem; color: white; border: none; outline: none; cursor: pointer; }
+
+        .right-actions { display: flex; align-items: center; gap: 1.2rem; }
+        .play-now { background: var(--neon-purple); border: none; color: white; padding: 0.5rem 1.5rem; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .play-now:hover { background: #9011dd; box-shadow: 0 0 15px var(--neon-purple); }
+        .icon-btn { background: none; border: none; color: #e0e0e0; font-size: 1.3rem; cursor: pointer; position: relative; }
+        .icon-btn:hover { color: var(--neon-purple); }
+        .profile-avatar { width: 36px; height: 36px; border-radius: 50%; background: #444; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid var(--neon-purple); cursor: pointer; }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .login-btn { background: transparent; border: 1px solid var(--neon-purple); color: white; padding: 0.4rem 1.2rem; border-radius: 40px; font-weight: 500; cursor: pointer; }
+
+        /* 3-col layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 260px 1fr 300px;
+            gap: 1.2rem;
+            padding: 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* left sidebar glassmorphism */
+        .left-sidebar, .right-sidebar, .center-content {
+            background: rgba(20,20,20,0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 24px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            border: 1px solid #2c2c2c;
+        }
+
+        .left-sidebar nav { display: flex; flex-direction: column; gap: 1.2rem; }
+        .nav-section p { color: var(--text-muted); font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 0.4rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.45rem 0.8rem; border-radius: 12px; transition: 0.2s; color: #ccc; }
+        .nav-item i { width: 22px; color: var(--neon-purple); }
+        .nav-item:hover { background: #2a2a2a; color: white; transform: translateX(5px); }
+
+        /* center content cards */
+        .featured-banner {
+            background: linear-gradient(145deg, #1e1a2a, #0f0f1f);
+            border-radius: 28px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--neon-purple);
+            box-shadow: 0 0 20px rgba(179,0,255,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .countdown { font-size: 2rem; font-weight: 700; color: white; }
+        .countdown span { color: var(--neon-purple); }
+        .join-btn { background: var(--neon-blue); border: none; padding: 0.8rem 2rem; border-radius: 40px; font-weight: 700; }
+
+        .section-title { font-size: 1.4rem; margin: 1.5rem 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; }
+        .game-card, .tourney-card, .news-card { background: var(--card-bg); border-radius: 20px; padding: 1rem; transition: 0.2s; border: 1px solid #2e2e2e; }
+        .game-card:hover { transform: translateY(-4px); border-color: var(--neon-purple); }
+        .live-badge { color: var(--neon-red); font-weight: 600; }
+        .watch-btn { background: #2e2e2e; border: none; color: white; padding: 0.2rem 1rem; border-radius: 30px; margin-top: 0.5rem; }
+
+        /* news tabs */
+        .news-tabs { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 1.2rem; }
+        .news-tab { background: #2a2a2a; border: none; color: #ccc; padding: 0.4rem 1.2rem; border-radius: 30px; cursor: pointer; }
+        .news-tab.active { background: var(--neon-purple); color: white; }
+        .news-card { display: flex; flex-direction: column; gap: 0.5rem; }
+        .news-img { height: 120px; background: #333; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #aaa; }
+
+        /* social feed */
+        .post-creator { background: #222; border-radius: 28px; padding: 1rem; margin: 1.8rem 0; }
+        .post-textarea { width: 100%; background: #2e2e2e; border: none; border-radius: 20px; padding: 0.8rem; color: white; resize: none; }
+        .post-actions { display: flex; gap: 1rem; margin-top: 0.8rem; align-items: center; }
+        .post-btn { background: var(--neon-purple); border: none; padding: 0.4rem 1.5rem; border-radius: 30px; }
+        .feed-post { background: #1f1f1f; border-radius: 20px; padding: 1rem; margin: 1rem 0; }
+
+        /* right sidebar widgets */
+        .widget { background: #1a1a1a; border-radius: 20px; padding: 1rem; margin-bottom: 1.2rem; }
+        .live-stream { display: flex; justify-content: space-between; align-items: center; margin: 0.5rem 0; }
+        .mini-leaderboard li { display: flex; justify-content: space-between; padding: 0.3rem 0; }
+        .daily-reward { background: linear-gradient(45deg, #2a1a3a, #1f1f2a); border-radius: 24px; padding: 1rem; text-align: center; }
+        .claim-btn { background: var(--neon-purple); border: none; border-radius: 40px; padding: 0.6rem 2rem; margin-top: 0.5rem; }
+
+        /* MODAL signup */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 200; }
+        .modal.active { display: flex; }
+        .modal-content { background: #1a1a1a; border-radius: 32px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 2rem; border: 1px solid var(--neon-purple); }
+        .modal-content input, .modal-content textarea, .modal-content select { background: #2e2e2e; border: none; border-radius: 12px; padding: 0.7rem; color: white; width: 100%; margin-bottom: 1rem; }
+        .img-preview { width: 70px; height: 70px; border-radius: 50%; background: #333; margin: 0.5rem 0; object-fit: cover; }
+
+        /* profile section */
+        .profile-header { background: #1a1a1a; border-radius: 28px; overflow: hidden; margin: 2rem 0; }
+        .cover { height: 130px; background: linear-gradient(90deg, var(--neon-purple), #1a1a4a); }
+        .profile-detail { display: flex; gap: 1.2rem; padding: 1rem; }
+        .profile-pic-lg { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--neon-purple); background: #333; }
+
+        /* responsive */
+        .menu-toggle { display: none; background: none; color: white; font-size: 1.8rem; border: none; }
+        @media (max-width: 900px) {
+            .right-sidebar { display: none; }
+            .main-grid { grid-template-columns: 80px 1fr; }
+            .left-sidebar .nav-item span { display: none; }
+            .left-sidebar { width: 80px; overflow: hidden; }
+        }
+        @media (max-width: 700px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .left-sidebar { display: none; }
+            .menu-toggle { display: block; }
+            .search-wrapper { order: 3; width: 100%; margin: 0.5rem 0 0; }
+        }
+        /* hamburger menu for mobile (simple toggle via JS) */
+        .mobile-nav.active { display: block; position: fixed; top: 70px; left: 0; background: #0f0f0f; width: 250px; height: 100%; padding: 1rem; z-index: 99; border-right: 1px solid #333; }
+    </style>
+</head>
+<body>
+    <!-- STICKY HEADER -->
+    <header class="sticky-header">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <div class="logo-area">
+            <span class="logo">👍THUMBSAPP</span>
+            <a href="#" class="home-link">Home</a>
+        </div>
+        <div class="search-wrapper">
+            <input type="text" class="search-bar" placeholder="Search games, players, news...">
+            <select class="category-dropdown">
+                <option>Trending</option><option>Football</option><option>Sports</option><option>Business</option><option>Technology</option><option>Entertainment</option>
+            </select>
+        </div>
+        <div class="right-actions">
+            <button class="play-now"><i class="fas fa-play"></i> Play Now</button>
+            <button class="icon-btn"><i class="fas fa-bell"></i></button>
+            <button class="icon-btn"><i class="fas fa-envelope"></i></button>
+            <div class="profile-avatar" id="navbarAvatar" onclick="openProfileModal()">
+                <img id="navProfileImg" src="https://via.placeholder.com/36/333/aaa?text=?" alt="avatar">
+            </div>
+            <button class="login-btn" id="signupTrigger">Sign Up</button>
+        </div>
+    </header>
+
+    <!-- MAIN 3-COLUMN LAYOUT -->
+    <div class="main-grid">
+        <!-- LEFT SIDEBAR (desktop) + mobile fallback via menu -->
+        <aside class="left-sidebar" id="leftSidebar">
+            <nav>
+                <div class="nav-section"><p>MAIN</p></div>
+                <div class="nav-item"><i class="fas fa-home"></i> <span>Dashboard</span></div>
+                <div class="nav-item"><i class="fas fa-gamepad"></i> <span>My Games</span></div>
+                <div class="nav-item"><i class="fas fa-trophy"></i> <span>Live Matches</span></div>
+                <div class="nav-item"><i class="fas fa-calendar-alt"></i> <span>Tournaments</span></div>
+                <div class="nav-item"><i class="fas fa-chart-line"></i> <span>Leaderboard</span></div>
+                <div class="nav-item"><i class="fas fa-medal"></i> <span>Achievements</span></div>
+                <div class="nav-item"><i class="fas fa-store"></i> <span>Store</span></div>
+                <div class="nav-item"><i class="fas fa-newspaper"></i> <span>News</span></div>
+                <div class="nav-item"><i class="fas fa-sliders-h"></i> <span>Settings</span></div>
+                <div class="nav-section" style="margin-top:1rem"><p>CATEGORIES</p></div>
+                <div class="nav-item"><i class="fas fa-fire"></i> <span>Trending Games</span></div>
+                <div class="nav-item"><i class="fas fa-users"></i> <span>Multiplayer</span></div>
+                <div class="nav-item"><i class="fas fa-skull"></i> <span>Battle Royale</span></div>
+                <div class="nav-item"><i class="fas fa-futbol"></i> <span>Sports Games</span></div>
+                <div class="nav-item"><i class="fas fa-car"></i> <span>Racing</span></div>
+                <div class="nav-item"><i class="fas fa-chess"></i> <span>Strategy</span></div>
+                <div class="nav-section"><p>COMMUNITY</p></div>
+                <div class="nav-item"><i class="fas fa-user-friends"></i> <span>Friends</span></div>
+                <div class="nav-item"><i class="fas fa-flag"></i> <span>Clans</span></div>
+                <div class="nav-item"><i class="fas fa-comments"></i> <span>Forums</span></div>
+            </nav>
+        </aside>
+
+        <!-- CENTER CONTENT (main area) -->
+        <main class="center-content">
+            <!-- FEATURED BANNER with countdown -->
+            <div class="featured-banner">
+                <div>
+                    <h2 style="font-size: 2rem;">🏆 LEGEND CUP</h2>
+                    <p>Prize pool $50,000 · Register now</p>
+                    <div class="countdown" id="countdown">02 : 14 : 32</div>
+                </div>
+                <button class="join-btn">Join Now</button>
+            </div>
+
+            <!-- LIVE MATCHES SECTION -->
+            <div class="section-title"><i class="fas fa-circle" style="color:var(--neon-red)"></i> Live matches</div>
+            <div class="card-grid">
+                <div class="game-card"><i class="fas fa-gamepad"></i> <strong>FURY X</strong> <span class="live-badge">LIVE</span><div>TSM 2 : 1 FNC</div><button class="watch-btn">Watch</button></div>
+                <div class="game-card"><i class="fas fa-basketball-ball"></i> <strong>NBA 2K24</strong> <span class="live-badge">LIVE</span><div>Lakers 78 : 72 Bulls</div><button class="watch-btn">Watch</button></div>
+                <div class="game-card"><i class="fas fa-futbol"></i> <strong>eFootball</strong> <span class="live-badge">LIVE</span><div>Milan 3 : 2 Inter</div><button class="watch-btn">Watch</button></div>
+            </div>
+
+            <!-- TOURNAMENTS -->
+            <div class="section-title"><i class="fas fa-trophy" style="color:gold"></i> Tournaments</div>
+            <div class="card-grid">
+                <div class="tourney-card"><h4>Summer Clash</h4><p>💰 $10k</p><p>📅 starts 12.08</p><button>Register</button></div>
+                <div class="tourney-card"><h4>Rookie Cup</h4><p>💰 $2k</p><p>📅 starts 15.08</p><button>Register</button></div>
+                <div class="tourney-card"><h4>Pro League</h4><p>💰 $25k</p><p>📅 starts 19.08</p><button>Register</button></div>
+            </div>
+
+            <!-- NEWS SECTION with tabs and cards -->
+            <div class="section-title"><i class="fas fa-newspaper"></i> Gaming & World News</div>
+            <div class="news-tabs" id="newsTabs">
+                <button class="news-tab active" data-cat="trending">Trending</button>
+                <button class="news-tab" data-cat="football">Football</button>
+                <button class="news-tab" data-cat="sports">Sports</button>
+                <button class="news-tab" data-cat="business">Business</button>
+                <button class="news-tab" data-cat="tech">Technology</button>
+                <button class="news-tab" data-cat="entertainment">Entertainment</button>
+            </div>
+            <div class="card-grid" id="newsGrid">
+                <!-- filled by JS -->
+            </div>
+
+            <!-- SOCIAL MEDIA FEED with post creation -->
+            <div class="post-creator">
+                <textarea class="post-textarea" id="postInput" placeholder="Share something..."></textarea>
+                <div class="post-actions">
+                    <button class="post-btn" id="postBtn"><i class="fas fa-paper-plane"></i> Post</button>
+                    <label><i class="fas fa-image"></i> Image</label>
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                </div>
+            </div>
+            <div id="socialFeed"></div>
+        </main>
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="right-sidebar">
+            <div class="widget"><h4>🔴 Live Now</h4>
+                <div class="live-stream"><span>shroud</span> <button>Watch</button></div>
+                <div class="live-stream"><span>Ninja</span> <button>Watch</button></div>
+            </div>
+            <div class="widget"><h4>🏅 Leaderboard</h4><ul class="mini-leaderboard"><li>ShadowHunter <span>8900 XP</span></li><li>Vex <span>7200 XP</span></li><li>Frosty <span>6500 XP</span></li></ul></div>
+            <div class="widget"><h4>📊 Player stats</h4><p>Rank: Diamond</p><p>XP: 12450</p><p>Matches: 689</p><p>Win rate: 61%</p></div>
+            <div class="daily-reward"><i class="fas fa-gift"></i> <h4>Daily reward</h4><button class="claim-btn" id="claimDaily">Claim 200 XP</button></div>
+        </aside>
+    </div>
+
+    <!-- USER PROFILE SECTION (below main grid) -->
+    <div style="max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem;">
+        <div class="profile-header" id="userProfileSection">
+            <div class="cover"></div>
+            <div class="profile-detail">
+                <div class="profile-pic-lg" id="profilePicContainer"><img id="profilePic" src="https://via.placeholder.com/80/333/aaa?text=User" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>
+                <div><h2 id="profileName">Gamer</h2><p id="profileUsername">@username</p><p id="profileBio">This is your bio. Edit profile to change.</p><button id="editProfileBtn" style="background: var(--neon-purple); border: none; border-radius: 30px; padding: 0.3rem 1.2rem;">Edit profile</button></div>
+            </div>
+        </div>
+        <h3>Your posts</h3>
+        <div id="userPosts"></div>
+    </div>
+
+    <!-- SIGNUP MODAL (account creation) -->
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <h2>Create account</h2>
+            <input type="text" id="firstName" placeholder="First name">
+            <input type="text" id="lastName" placeholder="Last name">
+            <input type="text" id="nickname" placeholder="Nickname">
+            <input type="text" id="username" placeholder="Username">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <input type="password" id="confirmPwd" placeholder="Confirm password">
+            <input type="date" id="dob">
+            <select id="country"><option>USA</option><option>UK</option><option>Canada</option></select>
+            <textarea id="bio" placeholder="Bio (max 150)"></textarea>
+            <label>Profile image:</label>
+            <input type="file" id="profileUpload" accept="image/*">
+            <img class="img-preview" id="profilePreview" src="https://via.placeholder.com/70/333/aaa?text=Preview">
+            <div style="display: flex; gap: 0.5rem;">
+                <button id="registerBtn" style="background: var(--neon-purple);">Register</button>
+                <button id="closeModal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ----- GLOBAL DATA & STATE -----
+            let loggedUser = JSON.parse(localStorage.getItem('thumbsapp_user')) || null;
+            const newsData = {
+                trending: [{ title: "New Battle Royale breaks record", desc: "12M players in 24h", img: "🔥" }, { title: "ESL Pro League finals", desc: "today 6PM", img: "🏆" }],
+                football: [{ title: "Messi wins eWorld Cup", desc: "2-1 thriller", img: "⚽" }, { title: "FIFA update patch", desc: "gameplay changes", img: "🎮" }],
+                sports: [{ title: "NBA 2K24 season 5", desc: "new cards", img: "🏀" }, { title: "Madden tournament", desc: "prize $10k", img: "🏈" }],
+                business: [{ title: "Gaming stocks soar", desc: "record revenues", img: "📈" }, { title: "Microsoft-Activision", desc: "deal closed", img: "💼" }],
+                tech: [{ title: "NVIDIA RTX 5090 leak", desc: "performance jump", img: "💻" }, { title: "New Unreal Engine 5.4", desc: "nanite upgrade", img: "⚙️" }],
+                entertainment: [{ title: "The Last of Us S2", desc: "trailer out", img: "🎬" }, { title: "Arcane S2 date", desc: "november", img: "🎥" }]
+            };
+            let posts = JSON.parse(localStorage.getItem('social_posts')) || [{ user: "System", text: "Welcome to ThumbsApp!", time: new Date().toLocaleString(), likes: 5 }];
+
+            // ----- RENDER NEWS based on active tab -----
+            function renderNews(cat = 'trending') {
+                const grid = document.getElementById('newsGrid');
+                const items = newsData[cat] || newsData.trending;
+                grid.innerHTML = items.map(item => `
+                    <div class="news-card">
+                        <div class="news-img">${item.img}</div>
+                        <h4>${item.title}</h4>
+                        <p>${item.desc}</p>
+                        <span style="color: #aaa;">5 min ago</span>
+                        <button>Read more</button>
+                    </div>
+                `).join('');
+            }
+
+            // ----- RENDER SOCIAL FEED -----
+            function renderFeed() {
+                const feed = document.getElementById('socialFeed');
+                feed.innerHTML = posts.map((p, idx) => `
+                    <div class="feed-post" data-idx="${idx}">
+                        <div style="display:flex; gap:0.8rem; align-items:center;">
+                            <img src="${p.avatar || 'https://via.placeholder.com/36/333/aaa?text=U'}" style="width:36px;height:36px;border-radius:50%;">
+                            <div><strong>${p.user}</strong> <span style="color:#aaa;">@${p.nickname || 'user'}</span></div>
+                            <span style="margin-left:auto; font-size:0.8rem;">${p.time}</span>
+                        </div>
+                        <p style="margin:0.5rem 0;">${p.text}</p>
+                        <div style="display:flex; gap:1.5rem; margin-top:0.5rem;">
+                            <button class="like-btn" data-idx="${idx}"><i class="fas fa-heart" style="color:${p.liked ? 'red' : '#777'}"></i> ${p.likes || 0}</button>
+                            <button><i class="fas fa-comment"></i> Comment</button>
+                            <button><i class="fas fa-share"></i> Share</button>
+                        </div>
+                    </div>
+                `).join('');
+                // like toggle
+                document.querySelectorAll('.like-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = btn.dataset.idx;
+                        posts[idx].liked = !posts[idx].liked;
+                        posts[idx].likes = (posts[idx].likes || 0) + (posts[idx].liked ? 1 : -1);
+                        localStorage.setItem('social_posts', JSON.stringify(posts));
+                        renderFeed();
+                    });
+                });
+            }
+
+            // ----- MODAL LOGIC & SIGNUP -----
+            const modal = document.getElementById('signupModal');
+            document.getElementById('signupTrigger').addEventListener('click', () => modal.classList.add('active'));
+            document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('active'));
+            document.getElementById('profileUpload').addEventListener('change', function(e) {
+                const reader = new FileReader();
+                reader.onload = () => document.getElementById('profilePreview').src = reader.result;
+                if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+            });
+
+            document.getElementById('registerBtn').addEventListener('click', function() {
+                const fName = document.getElementById('firstName').value;
+                const lName = document.getElementById('lastName').value;
+                const nick = document.getElementById('nickname').value;
+                const user = document.getElementById('username').value;
+                const pwd = document.getElementById('password').value;
+                const confirm = document.getElementById('confirmPwd').value;
+                const bio = document.getElementById('bio').value;
+                if (!fName || !user || pwd !== confirm) { alert('Check fields'); return; }
+                // profile image preview as data url (simulate)
+                const previewSrc = document.getElementById('profilePreview').src;
+                const userObj = { first: fName, last: lName, nick, user, bio, avatar: previewSrc };
+                localStorage.setItem('thumbsapp_user', JSON.stringify(userObj));
+                loggedUser = userObj;
+                document.getElementById('navProfileImg').src = previewSrc;
+                document.getElementById('profilePic').src = previewSrc;
+                document.getElementById('profileName').innerText = nick || fName;
+                document.getElementById('profileUsername').innerText = '@' + user;
+                document.getElementById('profileBio').innerText = bio || 'No bio';
+                modal.classList.remove('active');
+                alert('Registered! (temporary localStorage)');
+            });
+
+            // ----- POST CREATION -----
+            document.getElementById('postBtn').addEventListener('click', function() {
+                const text = document.getElementById('postInput').value.trim();
+                if (!text) return;
+                const newPost = {
+                    user: loggedUser?.nick || 'Guest',
+                    nickname: loggedUser?.user || 'guest',
+                    text: text,
+                    time: new Date().toLocaleString(),
+                    likes: 0,
+                    avatar: loggedUser?.avatar || 'https://via.placeholder.com/36/333/aaa?text=U'
+                };
+                posts.unshift(newPost);
+                localStorage.setItem('social_posts', JSON.stringify(posts));
+                document.getElementById('postInput').value = '';
+                renderFeed();
+            });
+
+            // ----- NEWS TABS SWITCHING -----
+            document.querySelectorAll('.news-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.news-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    renderNews(this.dataset.cat);
+                });
+            });
+
+            // ----- COUNTDOWN TIMER (tournament) -----
+            function updateCountdown() {
+                const el = document.getElementById('countdown');
+                const target = new Date().getTime() + 2 * 3600000; // 2h from now (demo)
+                const now = new Date().getTime();
+                const diff = target - now;
+                if (diff <= 0) { el.innerText = "LIVE NOW"; return; }
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                el.innerText = `${h.toString().padStart(2,'0')} : ${m.toString().padStart(2,'0')} : ${s.toString().padStart(2,'0')}`;
+            }
+            setInterval(updateCountdown, 1000);
+
+            // ----- DAILY REWARD CLAIM (mini sim) -----
+            document.getElementById('claimDaily')?.addEventListener('click', function() {
+                alert('+200 XP claimed! (simulated)');
+            });
+
+            // ----- MOBILE SIDEBAR TOGGLE (hamburger) -----
+            const leftSidebar = document.getElementById('leftSidebar');
+            document.getElementById('menuToggle').addEventListener('click', function() {
+                leftSidebar.style.display = (leftSidebar.style.display === 'block' || leftSidebar.style.display === '') ? 'none' : 'block';
+                if (window.innerWidth <= 700) {
+                    leftSidebar.style.display = 'block';
+                    leftSidebar.classList.toggle('mobile-nav');
+                }
+            });
+
+            // ----- INITIAL UI update from localStorage -----
+            if (loggedUser) {
+                document.getElementById('navProfileImg').src = loggedUser.avatar || 'https://via.placeholder.com/36/333/aaa?text=?';
+                document.getElementById('profilePic').src = loggedUser.avatar || 'https://via.placeholder.com/80/333/aaa?text=User';
+                document.getElementById('profileName').innerText = loggedUser.nick || loggedUser.first;
+                document.getElementById('profileUsername').innerText = '@' + loggedUser.user;
+                document.getElementById('profileBio').innerText = loggedUser.bio || 'No bio';
+            }
+
+            renderNews('trending');
+            renderFeed();
+
+            // EDIT PROFILE button (simple alert)
+            document.getElementById('editProfileBtn').addEventListener('click', ()=> alert('Edit profile modal (not fully implemented). Use signup to change.'));
+
+            // Also display user posts area (dummy)
+            function renderUserPosts() {
+                const container = document.getElementById('userPosts');
+                const userPostsFiltered = posts.filter(p => p.user === (loggedUser?.nick || 'Guest'));
+                if (userPostsFiltered.length === 0) container.innerHTML = '<p>No posts yet</p>';
+                else container.innerHTML = userPostsFiltered.map(p => `<div class="feed-post">${p.text}</div>`).join('');
+            }
+            renderUserPosts();
+            // extra: after new post update user posts
+            const originalPost = document.getElementById('postBtn').click;
+            document.getElementById('postBtn').addEventListener('click', function() { setTimeout(renderUserPosts, 50); });
+        })();
+
+        function openProfileModal() { alert('profile view — edit via signup'); }
+    </script>
+</body>
+</html>
